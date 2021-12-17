@@ -44,5 +44,18 @@ namespace ArdalisRating.Tests
 
             Assert.Equal(0, result);
         }
+
+        [Fact]
+        public void ReturnsDefaultPolicyFromEmptyJsonString()
+        {
+            var inputJson = "{}";
+            var serializer = new PolicySerializer();
+
+            var result = serializer.getPolicyFromJsonString(inputJson);
+
+            var policy = new Policy();
+
+            Assert.Equal(result.ToString(), policy.ToString());
+        }
     }
 }
