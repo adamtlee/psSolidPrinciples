@@ -11,11 +11,11 @@ namespace ArdalisRating
     /// </summary>
     public class RatingEngine
     {
-        public ConsoleLogger _logger = new ConsoleLogger();
+        private ConsoleLogger _logger = new ConsoleLogger();
 
-        public FilePolicySource _filePolicySource = new FilePolicySource();
+        private FilePolicySource _filePolicySource = new FilePolicySource();
 
-        public PolicySerializer _policySerializer = new PolicySerializer();
+        private PolicySerializer _policySerializer = new PolicySerializer();
         
         public decimal Rating { get; set; }
         public void Rate()
