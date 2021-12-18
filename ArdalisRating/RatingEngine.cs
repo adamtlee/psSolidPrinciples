@@ -12,87 +12,29 @@ namespace ArdalisRating
     public class RatingEngine
     {
 
-        private ConsoleLogger _logger = new ConsoleLogger();
-
-        private FilePolicySource _filePolicySource = new FilePolicySource();
-
-        private PolicySerializer _policySerializer = new PolicySerializer();
-        
+        public ConsoleLogger Logger { get; set; } = new ConsoleLogger();
+        public FilePolicySource PolicySource { get; set; } = new FilePolicySource();
+        public JsonPolicySerializer PolicySerializer { get; set; } = new JsonPolicySerializer();
         public decimal Rating { get; set; }
         public void Rate()
         {
-            _logger.Log("Starting rate.");
+            Logger.Log("Starting rate.");
 
-            _logger.Log("Loading policy.");
+            Logger.Log("Loading policy.");
 
             // load policy - open file policy.json
-            string policyJson = _filePolicySource.GetPolicyFromSource();
+            string policyJson = PolicySource.GetPolicyFromSource();
 
-            var policy = _policySerializer.getPolicyFromJsonString(policyJson);
+            var policy = PolicySerializer.getPolicyFromJsonString(policyJson);
 
-            switch (policy.Type)
-            {
-                case PolicyType.Auto:
-                    var rater = new AutoPolicyRater(this, this._logger);
-                    rater.Rate(policy); 
-                    break;
+            var factory = new RaterFactory();
 
-                case PolicyType.Land:
-                    _logger.Log("Rating LAND policy...");
-                    _logger.Log("Validating policy.");
-                    if (policy.BondAmount == 0 || policy.Valuation == 0)
-                    {
-                        _logger.Log("Land policy must specify Bond Amount and Valuation.");
-                        return;
-                    }
-                    if (policy.BondAmount < 0.8m * policy.Valuation)
-                    {
-                        _logger.Log("Insufficient bond amount.");
-                        return;
-                    }
-                    Rating = policy.BondAmount * 0.05m;
-                    break;
+            var rater = factory.Create(policy, this);
+            rater.Rate(policy);
 
-                case PolicyType.Life:
-                    _logger.Log("Rating LIFE policy...");
-                    _logger.Log("Validating policy.");
-                    if (policy.DateOfBirth == DateTime.MinValue)
-                    {
-                        _logger.Log("Life policy must include Date of Birth.");
-                        return;
-                    }
-                    if (policy.DateOfBirth < DateTime.Today.AddYears(-100))
-                    {
-                        _logger.Log("Centenarians are not eligible for coverage.");
-                        return;
-                    }
-                    if (policy.Amount == 0)
-                    {
-                        _logger.Log("Life policy must include an Amount.");
-                        return;
-                    }
-                    int age = DateTime.Today.Year - policy.DateOfBirth.Year;
-                    if (policy.DateOfBirth.Month == DateTime.Today.Month &&
-                        DateTime.Today.Day < policy.DateOfBirth.Day ||
-                        DateTime.Today.Month < policy.DateOfBirth.Month)
-                    {
-                        age--;
-                    }
-                    decimal baseRate = policy.Amount * age / 200;
-                    if (policy.IsSmoker)
-                    {
-                        Rating = baseRate * 2;
-                        break;
-                    }
-                    Rating = baseRate;
-                    break;
+            Logger.Log("Rating completed.");
 
-                default:
-                    _logger.Log("Unknown policy type");
-                    break;
-            }
 
-            _logger.Log("Rating completed.");
         }
     }
 }

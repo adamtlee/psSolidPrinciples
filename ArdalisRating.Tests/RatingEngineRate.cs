@@ -49,7 +49,7 @@ namespace ArdalisRating.Tests
         public void ReturnsDefaultPolicyFromEmptyJsonString()
         {
             var inputJson = "{}";
-            var serializer = new PolicySerializer();
+            var serializer = new JsonPolicySerializer();
 
             var result = serializer.getPolicyFromJsonString(inputJson);
 
